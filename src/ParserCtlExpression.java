@@ -237,54 +237,51 @@ public class ParserCtlExpression {
             posFunc = 1;
         }
         else if(function.equals("EG")){
-            posFunc += 2;
-            left = getProp(expression, posFunc);
-
-            expression = eg2af(left);
-            function = "!";
-            posFunc = 1;
-        }
-        else if(function.equals("AU")){
-            if(isFair) {//带有公平性的
+            if(!isFair) {//不带有公平性的
                 posFunc += 2;
-                String child = getProp(expression, posFunc);
+                left = getProp(expression, posFunc);
 
-                int posColon = findFunction(child);
-                left = getProp(child, 1);
-                right = getProp(child, ++posColon);
-
-
-                node.content = expression;
-                node.type = "function";
-                node.op = function;
-                node.left = parser(left, true);
-                node.right = parser(right, true);
-//                System.out.println("left:" + node.left);
-//                System.out.print("right:" + node.right);
-            }else{//不带公平性的
-//                posFunc += 2;
-//                String child = getProp(expression, posFunc);
-//
-//                int posColon = findFunction(child);
-//                left = getProp(child, 1);
-//                right = getProp(child, ++posColon);
-//
-//                expression = au2eueg(left, right);
-//                function = "|";
-//                posFunc = findFunction(expression);
-
+                expression = eg2af(left);
+                function = "!";
+                posFunc = 1;
+            }else{ //带有公平性的
                 posFunc += 2;
-                String child = getProp(expression, posFunc);
-
-                int posColon = findFunction(child);
-                left = getProp(child, 1);
-                right = getProp(child, ++posColon);
-
+                left = getProp(expression, posFunc);
                 node.content = expression;
                 node.type = "function";
                 node.op = function;
                 node.left = parser(left,isFair);
-                node.right = parser(right,isFair);
+                node.right = null;
+
+            }
+        }
+        else if(function.equals("AU")){
+            if(!isFair) {//不带有公平性的
+                posFunc += 2;
+                String child = getProp(expression, posFunc);
+
+                int posColon = findFunction(child);
+                left = getProp(child, 1);
+                right = getProp(child, ++posColon);
+
+
+                node.content = expression;
+                node.type = "function";
+                node.op = function;
+                node.left = parser(left, false);
+                node.right = parser(right, false);
+//                System.out.println("left:" + node.left);
+//                System.out.print("right:" + node.right);
+            }else{//带公平性的
+                posFunc += 2;
+                String child = getProp(expression, posFunc);
+                int posColon = findFunction(child);
+                left = getProp(child, 1);
+                right = getProp(child, ++posColon);
+                expression = au2eueg(left, right);
+                function = "&";
+                posFunc = findFunction(expression);
+
             }
 //            posFunc += 2;
 //            String child = getProp(expression, posFunc);

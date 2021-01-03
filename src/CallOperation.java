@@ -337,10 +337,115 @@ public class CallOperation {
                     Q.put(state_id,true);
             }
         }
-        /**2 **/
+        /**2 进行模型检查**/
+        LinkedList<TreeNode> origNodes = new LinkedList<>();
+        origNodes.push(node);//
+
+        LinkedList<TreeNode> postNodes = new LinkedList<>();
+        TreeNode aux;
+
+        while (!origNodes.isEmpty()) //如果链表不为空
+        {
+            TreeNode current = origNodes.peek(); //将节点出postNodes栈
+            origNodes.pop();
+
+            postNodes.push(current); //将节点入postNodes栈
+
+            if (current.left != null)
+                origNodes.push(current.left);//将左孩子节点入origNodes栈
+
+            if (current.right != null)
+                origNodes.push(current.right);////将右孩子节点入origNodes栈
+        }
+        while (!postNodes.isEmpty())//将二叉树中所有的节点放入postNodes栈，先序遍历
+        {
+            aux = postNodes.peek();
+
+            if(aux.type.equals("function")){
+
+                if(aux.op.equals("EX")){
+                    opEX(graph, aux.left.content, aux.content);
+                }
+                else if(aux.op.equals("EG")){
+                    opEG(graph, aux.left.content, aux.content);
+                }
+                else if(aux.op.equals("EU")){
+                    opEU(graph, aux.left.content, aux.right.content, aux.content,null);
+                }
+                else if(aux.op.equals("!")){
+                    opNot(graph, aux.left.content, aux.content);
+                }
+                else if(aux.op.equals("")){//原子命题
+                    opAnd(graph, aux.left.content, aux.right.content, aux.content);
+                }
+                else if(aux.op.equals("|")){
+                    opOr(graph, aux.left.content, aux.right.content, aux.content);
+                }
+                else System.out.println("Error while calling the algorithms!");
+
+            }
+            else{
+                opAdd(graph, aux.content);
+            }
+
+            postNodes.pop();
+        }
 
     }
 
+
+
+
+
+    /**
+     * 更新图的状态节点中的IsReachedStatesSet
+     * @param states
+     */
+    private void updateIsReachedStatesSet(List<GraphNode> states){
+
+        for(GraphNode node:states){
+            node.isReachedStatesSet.clear();
+            /**找到图中能够到达该节点的所有节点**/
+            for(GraphNode n:states){
+
+
+
+
+
+            }
+
+        }
+
+
+    }
+//    private void DFS1(List<GraphNode> states,GraphNode node){
+//        HashMap<Integer, Integer> vis = new HashMap<>();
+//        Stack<Integer> stack = new Stack<>();
+//        for (GraphNode graphNode : states) {
+//            vis.put(graphNode.id, 0);             //0--unvisited 1--visited
+//        }
+//        for(GraphNode graphNode : states) {
+//            if (vis.get(graphNode) == 0) {
+//                DFS( vis,stack,graphNode,states,node);
+//            }
+//        }
+//
+//    }
+//    private void DFS ( HashMap<Integer, Integer> vis, Stack<Integer> stack, GraphNode n,List<GraphNode> states,GraphNode node) {
+//        vis.put(n.id, 1); //将该节点设置为已访问过
+//        stack.push(n.id);
+//        if(n.id == node.id){//如果能
+//            node.isReachedStatesSet.add(n.id);
+//        }
+//        for (int n1 : n.next) {
+//
+//            if (vis.get(n1) == 0) {//如果该节点没有被访问过
+//                DFS (vis, stack, getStateById(states,n1),states);
+//            }else{
+//
+//            }
+//        }
+//    }
     /**
      * 根据id号得到状态节点
      * @param states

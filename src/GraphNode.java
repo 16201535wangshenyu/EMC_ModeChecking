@@ -5,6 +5,8 @@ public class GraphNode {
     public List<Integer> next = new ArrayList<>();//下一个节点的编号
     public HashSet<Integer> isReachedStatesSet = new HashSet<>();
 
+
+
     public Map<String, Boolean> properties = new HashMap<>();//原子命题的真假
 
     public HashSet<Integer> getIsReachedStatesSet() {
