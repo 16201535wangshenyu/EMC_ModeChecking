@@ -6,14 +6,20 @@ public class ParserCtlExpression {
      input: expression, property position
      ***/
     String getProp(String expression, int pos) {
-        String result = "(";
-        int level = 1;
-        for(int i = pos+1; level != 0; ++i){
-            result += expression.charAt(i);
-            if(expression.charAt(i) == '(') level++;
-            if(expression.charAt(i) == ')') level--;
+        try {
+            String result = "(";
+            int level = 1;
+            for (int i = pos + 1; level != 0; ++i) {
+                result += expression.charAt(i);
+                if (expression.charAt(i) == '(') level++;
+                if (expression.charAt(i) == ')') level--;
+            }
+            return result;
+        }catch (Exception e){
+            System.out.println("expression:"+expression);
+            exit(0);
+            return "";
         }
-        return result;
     }
 
     /***
@@ -117,7 +123,7 @@ public class ParserCtlExpression {
      input: p, q
      ***/
     String au2eueg(String left, String right){
-        String result = "((!(EU((!";
+        String result = "(!(EU((!";
         result += right;
         result += "),((!";
         result += left;
@@ -221,59 +227,16 @@ public class ParserCtlExpression {
             posFunc = 1;
         }
         else if (function.equals("AF")){
+            //System.out.println("hhhhhhhhhhhhhhhhhhhhhhh");
             posFunc += 2;
             left = getProp(expression, posFunc);
 
             expression = af2au(left);
             function = "AU";
-            posFunc = 1;
-        }
-        else if(function.equals("AG")){
-            posFunc += 2;
-            left = getProp(expression, posFunc);
-
-            expression = ag2eu(left);
-            function = "!";
-            posFunc = 1;
-        }
-        else if(function.equals("EG")){
-            if(!isFair) {//不带有公平性的
-                posFunc += 2;
-                left = getProp(expression, posFunc);
-
-                expression = eg2af(left);
-                function = "!";
-                posFunc = 1;
-            }else{ //带有公平性的
-                posFunc += 2;
-                left = getProp(expression, posFunc);
-                node.content = expression;
-                node.type = "function";
-                node.op = function;
-                node.left = parser(left,isFair);
-                node.right = null;
-
-            }
-        }
-        else if(function.equals("AU")){
-            if(!isFair) {//不带有公平性的
-                posFunc += 2;
-                String child = getProp(expression, posFunc);
-
-                int posColon = findFunction(child);
-                left = getProp(child, 1);
-                right = getProp(child, ++posColon);
 
 
-                node.content = expression;
-                node.type = "function";
-                node.op = function;
-                node.left = parser(left, false);
-                node.right = parser(right, false);
-//                System.out.println("left:" + node.left);
-//                System.out.print("right:" + node.right);
-            }else{//带公平性的
-                posFunc += 2;
+            if(isFair) {//如果是公平性的
+                //parser(expression, isFair);
                 String child = getProp(expression, posFunc);
                 int posColon = findFunction(child);
                 left = getProp(child, 1);
@@ -281,19 +244,47 @@ public class ParserCtlExpression {
                 expression = au2eueg(left, right);
                 function = "&";
                 posFunc = findFunction(expression);
-
+            }else{
+                posFunc = 1;
             }
-//            posFunc += 2;
-//            String child = getProp(expression, posFunc);
-//
-//            int posColon = findFunction(child);
-//            System.out.println("AUUUUUUUUU");
-//            left = getProp(child, 1);
-//            right = getProp(child, ++posColon);
-//
-//            //expression = au2afeu(left, right);
-//            function = "AU";
-//            posFunc = findFunction(expression);
+
+
+
+
+        }
+        else if(function.equals("AG")){
+            posFunc += 2;
+            left = getProp(expression, posFunc);
+
+            expression = ag2eu(left);
+//            System.out.println("expression:"+expression);
+            function = "!";
+            posFunc = 1;
+        }
+        else if(function.equals("EG") && !isFair){
+
+                posFunc += 2;
+                left = getProp(expression, posFunc);
+
+                expression = eg2af(left);
+                function = "!";
+                posFunc = 1;
+
+
+        }
+        else if(function.equals("AU") && isFair){
+
+            posFunc += 2;
+            String child = getProp(expression, posFunc);
+            int posColon = findFunction(child);
+            left = getProp(child, 1);
+            right = getProp(child, ++posColon);
+            expression = au2eueg(left, right);
+            function = "&";
+            posFunc = findFunction(expression);
+
+
+
         }
         else if(function.equals("->")){
             posFunc += 2;
@@ -314,7 +305,7 @@ public class ParserCtlExpression {
             posFunc = findFunction(expression);
         }
 
-        else if(function.equals("EX")){
+        if(function.equals("EX")){
             posFunc += 2;
             left = getProp(expression, posFunc);
 
@@ -323,6 +314,33 @@ public class ParserCtlExpression {
             node.op = function;
             node.left = parser(left,isFair);
             node.right = null;
+        }
+        else if(function.equals("AU") && isFair==false){
+            posFunc += 2;
+            String child = getProp(expression, posFunc);
+
+            int posColon = findFunction(child);
+            left = getProp(child, 1);
+            right = getProp(child, ++posColon);
+
+
+            node.content = expression;
+            node.type = "function";
+            node.op = function;
+            node.left = parser(left, false);
+            node.right = parser(right, false);
+
+
+        }
+        else if(function.equals("EG") && isFair){
+            posFunc += 2;
+            left = getProp(expression, posFunc);
+            node.content = expression;
+            node.type = "function";
+            node.op = function;
+            node.left = parser(left,isFair);
+            node.right = null;
+
         }
         else if(function.equals("AF")){
             posFunc += 2;
@@ -374,6 +392,7 @@ public class ParserCtlExpression {
             node.content = expression;
             node.type = "function";
             node.op = function;
+//            System.out.println("left:"+left);
             node.left = parser(left,isFair);
             node.right = null;
         }

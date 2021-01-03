@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
 
@@ -15,7 +17,7 @@ import java.util.Scanner;
 
  */
 public class Test1 {
-    /***
+    /***(AG((RcvMsg)->(AU((RcvMsg),((!RcvMsg)&(AU((!RcvMsg),(SndMsg))))))))
      用于打印在状态机输入中应用的表达式的结果：
      输入：状态机，修改的表达式，原始表达式
      ***/
@@ -44,12 +46,33 @@ public class Test1 {
         expression = in.next();//表达式
 
         ParserCtlExpression parserCtlExpression = new ParserCtlExpression();
-//        ctlTree = parserCtlExpression.parser(expression);
-        System.out.println(ctlTree);
+        ctlTree = parserCtlExpression.parser(expression,true);
+        //System.out.println(ctlTree);
 
 
         CallOperation callOperation = new CallOperation();
-        callOperation.callOperation1(ctlTree, smGraphy);
+        /**输入如F**/
+        List<HashSet<Integer>> F = new ArrayList<>();
+//        System.out.println("请输入公平性约束F：");
+//        int num = in.nextInt();
+
+        int numlen = 2;
+        HashSet<Integer> set1 = new HashSet<>();
+        set1.add(3);
+        set1.add(7);
+        HashSet<Integer> set2 = new HashSet<>();
+        set1.add(6);
+        set1.add(8);
+        F.add(set1);
+        F.add(set2);
+
+//        for(int i=0;i<numlen;i++){(AG(AFC1))
+//
+//
+//
+//        }
+
+        callOperation.callOperation2(ctlTree, smGraphy,F);
         printResult(smGraphy, ctlTree.content, expression);
 
 

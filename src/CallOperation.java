@@ -105,60 +105,69 @@ public class CallOperation {
         Iterator<GraphNode> iter = eliminatedG.iterator();
         while (iter.hasNext()){
             GraphNode g = iter.next();
-            if(!g.nodes.get(a)){
+//            if(g==null){
+//                System.out.println("11111111111111111");
+//                System.exit(0);
+//            }
+
+            if(g.nodes.keySet().contains(a) && g.nodes.get(a)==false ){
                 iter.remove();
             }
         }
-        for (GraphNode g : eliminatedG){
-            int id = g.id;
-            List<Integer> nextList = g.next;
-            if (nextList.size()!=0){
-                for (Integer i : nextList){
-                    if(getStateById(eliminatedG,i) != null){
-                        if (newG.get(id) == null)
-                            newG.put(id,new ArrayList<>());
-                        newG.get(id).add(i);
+        if(!eliminatedG.isEmpty()) {
+            for (GraphNode g : eliminatedG) {
+                int id = g.id;
+                List<Integer> nextList = g.next;
+                if (nextList.size() != 0) {
+                    for (Integer i : nextList) {
+                        if (getStateById(eliminatedG, i) != null) {
+                            if (newG.get(id) == null)
+                                newG.put(id, new ArrayList<>());
+                            newG.get(id).add(i);
+                        }
                     }
                 }
             }
-        }
-//        HashMap<Integer,Boolean> Q = new HashMap<>();
-        Tarjan tarjan = new Tarjan(eliminatedG);
-        List<ArrayList<Integer>> strongComponents = tarjan.run();
-        HashSet<ArrayList<Integer>> FairStrongComponents = new HashSet<>();
-        for(ArrayList<Integer> strongComponent : strongComponents) {//遍历每一个强连通集合
-            Boolean isFair = true;
-            for(HashSet<Integer> f:  F){//遍历F中每一个集合
 
-                Boolean exist = false;
-                for(int i : f){ //遍历f中每一个元素
-                    if(strongComponent.contains(i)){
-                        exist = true;
+//        HashMap<Integer,Boolean> Q = new HashMap<>();
+            Tarjan tarjan = new Tarjan(eliminatedG);
+            List<ArrayList<Integer>> strongComponents = tarjan.run();
+            HashSet<ArrayList<Integer>> FairStrongComponents = new HashSet<>();
+            for (ArrayList<Integer> strongComponent : strongComponents) {//遍历每一个强连通集合
+                Boolean isFair = true;
+                for (HashSet<Integer> f : F) {//遍历F中每一个集合
+
+                    Boolean exist = false;
+                    for (int i : f) { //遍历f中每一个元素
+                        if (strongComponent.contains(i)) {
+                            exist = true;
+                            break;
+                        }
+                    }
+                    if (!exist) { //如果有某一个公平性F中的元素不满足
+                        isFair = false;
                         break;
                     }
-                }
-                if(!exist){ //如果有某一个公平性F中的元素不满足
-                    isFair  = false;
-                    break;
-                }
 
-            }
-            if(isFair){
-                FairStrongComponents.add(strongComponent);
-                for (Integer i : strongComponent){
-                    GraphNode state = getStateById(eliminatedG, i);
-                    if (state != null)
-                        state.nodes.put(value, true);
+                }
+                if (isFair) {
+                    FairStrongComponents.add(strongComponent);
+                    for (Integer i : strongComponent) {
+                        GraphNode state = getStateById(eliminatedG, i);
+                        if (state != null)
+                            state.nodes.put(value, true);
+                    }
                 }
             }
-        }
-        /**将公平性强连通分量中的节点以及能够到达强连通分量的状态全部设置为Q为TRUE**/
-        for(ArrayList<Integer> states: FairStrongComponents){
-            int state_id = states.get(0);
-            for (GraphNode g : eliminatedG){
-                int id = g.id;
-                if(bfs(newG,id,state_id)){
-                    g.nodes.put(value,true);             }
+            /**将公平性强连通分量中的节点以及能够到达强连通分量的状态全部设置为Q为TRUE**/
+            for (ArrayList<Integer> states : FairStrongComponents) {
+                int state_id = states.get(0);
+                for (GraphNode g : eliminatedG) {
+                    int id = g.id;
+                    if (bfs(newG, id, state_id)) {
+                        g.nodes.put(value, true);
+                    }
+                }
             }
         }
     }
@@ -369,13 +378,15 @@ public class CallOperation {
                 else if(aux.op.equals("!")){
                     opNot(graph, aux.left.content, aux.content);
                 }
-                else if(aux.op.equals("")){//原子命题
+                else if(aux.op.equals("&")){//原子命题
                     opAnd(graph, aux.left.content, aux.right.content, aux.content);
                 }
                 else if(aux.op.equals("|")){
                     opOr(graph, aux.left.content, aux.right.content, aux.content);
                 }
-                else System.out.println("Error while calling the algorithms!");
+                else {
+                    System.out.println(aux.op + " Error while calling the algorithms!");
+                }
 
             }
             else{
@@ -457,7 +468,7 @@ public class CallOperation {
                     opEX(graph, aux.left.content, aux.content);
                 }
                 else if(aux.op.equals("EG")){
-                    opEG(graph, aux.left.content, aux.content);
+                    opEG(graph, aux.left.content, aux.content,F);
                 }
                 else if(aux.op.equals("EU")){
                     opEU(graph, aux.left.content, aux.right.content, aux.content,null);
@@ -465,13 +476,13 @@ public class CallOperation {
                 else if(aux.op.equals("!")){
                     opNot(graph, aux.left.content, aux.content);
                 }
-                else if(aux.op.equals("")){//原子命题
+                else if(aux.op.equals("&")){//原子命题
                     opAnd(graph, aux.left.content, aux.right.content, aux.content);
                 }
                 else if(aux.op.equals("|")){
                     opOr(graph, aux.left.content, aux.right.content, aux.content);
                 }
-                else System.out.println("Error while calling the algorithms!");
+                else System.out.println(aux.op+ " Error while calling the algorithms!");
 
             }
             else{
