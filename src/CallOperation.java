@@ -75,6 +75,93 @@ public class CallOperation {
             }
         }
     }
+    Boolean bfs(Map<Integer, List<Integer>> graph, int a, int strongComponents){
+        Boolean visited[] = new Boolean[10000];
+        LinkedList<Integer> queue = new LinkedList<>();
+        visited[a] = true;
+        queue.offer(a);
+        while ( queue.isEmpty() ){
+            int temp = queue.poll();
+            if(temp == strongComponents)
+                return true;
+            List<Integer> next = graph.get(temp);
+            if (next.size() != 0){
+                for(Integer i : next){
+                    if ( !visited[i] )
+                        queue.offer(i);
+                }
+            }
+        }
+        return false;
+    }
+
+    void opEG(List<GraphNode> graph,String a, String value, List<HashSet<Integer>> F){
+        List<GraphNode> eliminatedG = new ArrayList<>();
+        /** 复制一个新的图 */
+        for(int i = 0; i < graph.size(); i++){
+            eliminatedG.add(graph.get(i));
+        }
+        Map<Integer, List<Integer>> newG = new HashMap<>();
+        Iterator<GraphNode> iter = eliminatedG.iterator();
+        while (iter.hasNext()){
+            GraphNode g = iter.next();
+            if(!g.nodes.get(a)){
+                iter.remove();
+            }
+        }
+        for (GraphNode g : eliminatedG){
+            int id = g.id;
+            List<Integer> nextList = g.next;
+            if (nextList.size()!=0){
+                for (Integer i : nextList){
+                    if(getStateById(eliminatedG,i) != null){
+                        if (newG.get(id) == null)
+                            newG.put(id,new ArrayList<>());
+                        newG.get(id).add(i);
+                    }
+                }
+            }
+        }
+//        HashMap<Integer,Boolean> Q = new HashMap<>();
+        Tarjan tarjan = new Tarjan(eliminatedG);
+        List<ArrayList<Integer>> strongComponents = tarjan.run();
+        HashSet<ArrayList<Integer>> FairStrongComponents = new HashSet<>();
+        for(ArrayList<Integer> strongComponent : strongComponents) {//遍历每一个强连通集合
+            Boolean isFair = true;
+            for(HashSet<Integer> f:  F){//遍历F中每一个集合
+
+                Boolean exist = false;
+                for(int i : f){ //遍历f中每一个元素
+                    if(strongComponent.contains(i)){
+                        exist = true;
+                        break;
+                    }
+                }
+                if(!exist){ //如果有某一个公平性F中的元素不满足
+                    isFair  = false;
+                    break;
+                }
+
+            }
+            if(isFair){
+                FairStrongComponents.add(strongComponent);
+                for (Integer i : strongComponent){
+                    GraphNode state = getStateById(eliminatedG, i);
+                    if (state != null)
+                        state.nodes.put(value, true);
+                }
+            }
+        }
+        /**将公平性强连通分量中的节点以及能够到达强连通分量的状态全部设置为Q为TRUE**/
+        for(ArrayList<Integer> states: FairStrongComponents){
+            int state_id = states.get(0);
+            for (GraphNode g : eliminatedG){
+                int id = g.id;
+                if(bfs(newG,id,state_id)){
+                    g.nodes.put(value,true);             }
+            }
+        }
+    }
 
     /***
      Function to add a property of EU(a, b) oh the graph
@@ -270,6 +357,9 @@ public class CallOperation {
 //                else if(aux.op.equals("AF")){
 //                    opAF(graph, aux.left.content, aux.content);
 //                }
+                else if(aux.op.equals("EG")){
+                    opEG(graph, aux.left.content, aux.content,null);
+                }
                 else if(aux.op.equals("EU")){
                     opEU(graph, aux.left.content, aux.right.content, aux.content,null);
                 }
